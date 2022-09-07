@@ -24,6 +24,11 @@ class CrawlDataController extends Controller
         return view('main.index');
     }
 
+    public function index2(Request $request)
+    {
+        return view('main.index2');
+    }
+
     public function handleCrawl(Request $request)
     {
         $url = $request->domain;

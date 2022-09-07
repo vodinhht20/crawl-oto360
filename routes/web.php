@@ -18,4 +18,5 @@ Route::get('/', function () {
     return view('welcome');
 });
 Route::get('/crawl-data', [CrawlDataController::class, 'index']);
+Route::get('/crawl-data2', [CrawlDataController::class, 'index2']);
 Route::post('/post-crawl-data', [CrawlDataController::class, 'handleCrawl'])->name('post-crawl-data');
