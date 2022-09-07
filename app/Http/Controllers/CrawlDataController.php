@@ -45,6 +45,6 @@ class CrawlDataController extends Controller
             "sizes" => $sizes ?? [],
 
         ];
-        dd($data);
+        return response()->json($data);
     }
 }

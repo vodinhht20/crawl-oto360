@@ -36,19 +36,32 @@
         <div class="container">
           <h1>Nhập trang web muốn crawl</h1>
           <hr>
-          <form action="{{ route('post-crawl-data') }}" method="post">
+          <form method="post">
             @csrf
             <div class="form-group">
-              <label for="exampleInputEmail1">Nhập domain</label>
+              <label for="inp-domain">Nhập domain</label>
               {{ csrf_field() }}
               <input type="hidden" class="rule" name="rule" value="000000000">
-              <input type="url" class="form-control" name="domain" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="http://google.com...">
+              <input type="url" class="form-control" name="domain" id="inp-domain" aria-describedby="emailHelp" placeholder="http://google.com...">
+              <div id="loading"></div>
             </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
+            <button type="button" class="btn btn-primary" id="btn-submit">Submit</button>
+            <div id="data"></div>
           </form>
         </div>
         <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+        <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+        <script>
+          $('#btn-submit').on('click', async () => {
+            let domain = $('#inp-domain').val();
+            $("#loading").html("<p class='text-danger'>Vui lòng đợi, chúng tôi đang xử lý !</p>");
+            const respone = await axios.post("{{ route('post-crawl-data') }}", { domain });
+            $("#loading").html("<p class='text-success'>Đã xử lý</p>");
+            $("#data").html(JSON.stringify(respone?.data));
+            console.log("respone.data", respone?.data);
+          })
+        </script>
     </body>
 </html>
