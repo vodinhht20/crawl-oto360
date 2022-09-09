@@ -32,8 +32,8 @@ class CrawlDataController extends Controller
         $url = $request->domain;
         try {
             $crawler = GoutteFacade::request('GET', $url);
-            // $hasNoJsError = $crawler->filter('.no-js')->first()->text();
-            // dd($hasNoJsError);
+            $hasNoJsError = $crawler->filter('body')->first()->html();
+            dd($hasNoJsError);
             // if ($hasNoJsError) {
             //     return response()->json([
             //         "status" => false,
@@ -42,7 +42,12 @@ class CrawlDataController extends Controller
             // }
 
             // get title
-            $title = $crawler->filter('.container .product-info__header_title')->first()->text();
+            /**
+             * .product-info__header_title
+             * .container .product-info__header_title
+             */
+            $title = $crawler->filter('.product-info__body .product-info__header_title')->first()->text();
+            dd($title);
 
             // get size
             $sizes = $crawler->filter('.container .product-info__variants_value-wrapper')
