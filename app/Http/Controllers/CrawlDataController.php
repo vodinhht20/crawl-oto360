@@ -32,7 +32,8 @@ class CrawlDataController extends Controller
         $url = $request->domain;
         try {
             $crawler = GoutteFacade::request('GET', $url);
-            $hasNoJsError = $crawler->filter('body')->first()->text();
+            // $hasNoJsError = $crawler->filter('body')->first()->text();
+            // dd($hasNoJsError);
             // if ($hasNoJsError) {
             //     return response()->json([
             //         "status" => false,
@@ -49,6 +50,9 @@ class CrawlDataController extends Controller
             // foreach ($arrClassTitles as $class) {
             //     try {
             //         $title = $crawler->filter($class)->first()->text();
+            //         if (empty($title)) {
+            //             continue;
+            //         }
             //         break;
             //     } catch (\Exception $ex) {
             //         continue;
@@ -56,7 +60,7 @@ class CrawlDataController extends Controller
             // }
 
             // get size
-            $sizes = "";
+            $sizes = [];
             $arrClassSizes = [
                 ".container .product-info__variants_value-wrapper",
                 ".product-info__variants-wrapper"
@@ -69,13 +73,15 @@ class CrawlDataController extends Controller
                         ->each(function ($node) {
                             return $node->text();
                         });
+                    if (empty($sizes)) {
+                        continue;
+                    }
                     break;
                 } catch (\Exception $ex) {
                     continue;
                 }
             }
-            dd($sizes);
-
+dd($sizes);
             // get color
             $colors = $crawler->filter('.container .product-info__variants_value-wrapper')
                 ->first()
