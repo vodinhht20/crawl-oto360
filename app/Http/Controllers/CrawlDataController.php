@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Repositories\ProductImageRepository;
 use App\Repositories\ProductRepository;
 use DOMElement;
+use Exception;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -42,45 +43,50 @@ class CrawlDataController extends Controller
             // }
 
             // get title
-            // $arrClassTitles = [
-            //     ".product-info__header_title",
-            //     ".product-info__body .product-info__header_title"
-            // ];
-            // $title = "";
-            // foreach ($arrClassTitles as $class) {
-            //     try {
-            //         $title = $crawler->filter($class)->first()->text();
-            //         if (empty($title)) {
-            //             continue;
-            //         }
-            //         break;
-            //     } catch (\Exception $ex) {
-            //         continue;
-            //     }
-            // }
+            $arrClassTitles = [
+                ".product-info__header_title",
+                ".product-info__body .product-info__header_title"
+            ];
+            $title = "";
+            foreach ($arrClassTitles as $class) {
+                try {
+                    $title = $crawler->filter($class)->first()->text();
+                    if (empty($title)) {
+                        continue;
+                    }
+                    break;
+                } catch (\Exception $ex) {
+                    continue;
+                }
+            }
 
             // get size
-            // $sizes = [];
-            // $arrClassSizes = [
-            //     ".container .product-info__variants_value-wrapper",
-            //     ".product-info__variants-wrapper"
-            // ];
-            // foreach ($arrClassSizes as $class) {
-            //     try {
-            //         $sizes = $crawler->filter($class)
-            //             ->last()
-            //             ->filter('label')
-            //             ->each(function ($node) {
-            //                 return $node->text();
-            //             });
-            //         if (empty($sizes)) {
-            //             continue;
-            //         }
-            //         break;
-            //     } catch (\Exception $ex) {
-            //         continue;
-            //     }
-            // }
+            $sizes = [];
+            $arrClassSizes = [
+                ".container .product-info__variants_value-wrapper",
+                ".product-info__variants-wrapper"
+            ];
+            foreach ($arrClassSizes as $class) {
+                try {
+                    $sizes = $crawler->filter($class)
+                        ->last()
+                        ->filter('label')
+                        ->each(function ($node) {
+                            return $node->text();
+                        });
+
+                    if (is_array($sizes)) {
+                        $sizes = array_unique(array_filter($sizes, fn($item) => !empty($item)));
+                    }
+
+                    if (empty($sizes)) {
+                        continue;
+                    }
+                    break;
+                } catch (\Exception $ex) {
+                    continue;
+                }
+            }
 
             // get color
             $colors = [];
@@ -97,6 +103,11 @@ class CrawlDataController extends Controller
                         ->each(function ($node) {
                             return $node->attr('value');
                         });
+
+                    if (is_array($colors)) {
+                        $colors = array_unique(array_filter($colors, fn($item) => !empty($item)));
+                    }
+
                     if (empty($colors)) {
                         continue;
                     }
@@ -105,35 +116,72 @@ class CrawlDataController extends Controller
                     continue;
                 }
             }
-            dd($colors);
 
             // get price
-            $price = $crawler->filter('.product-info__header_price-wrapper .product-info__header_price')->first()->text();
+            $regularPrice = 0;
+            $salePrice = 0;
+            try {
+                $regularPrice = $crawler->filter('.product-info__header_price-wrapper .product-info__header_price')->first()->text();
+                $regularPrice = (float) ltrim($regularPrice, "$");
+            } catch (\Exception $e) {
+                //
+            }
 
-            // get price
-            $description = $crawler->filter('.product-info__desc-tab-content')->first()->html();
+            try {
+                $salePrice = $crawler->filter('.product-info__header_price-wrapper .product-info__header_compare-at-price')->first()->text();
+                $salePrice = (float) ltrim($salePrice, "$");
+            } catch (\Exception $e) {
+                //
+            }
+
+            // get description
+            $description = "";
+            try {
+                $description = $crawler->filter('.product-info__desc-tab-content')->first()->html();
+            } catch (\Exception $ex) {
+                //
+            }
 
             // get images
-            $images = $crawler->filter('.product-image .swiper-slide img')->each(function (Crawler $node) {
-                $element = $node->first();
-                return $element->attr("data-src") ?: $element->attr("src");
-            });
+            $images = [];
+            $arrClassImage = [
+                ".product-image .product-info__slide img",
+                ".product-image .swiper-slide img"
+            ];
+            foreach ($arrClassImage as $class) {
+                try {
+                    $images = $crawler->filter($class)->each(function (Crawler $node) {
+                        $element = $node->first();
+                        return $element->attr("data-lazy") ?: $element->attr("data-src") ?: $element->attr("src");
+                    });
+
+                    if (is_array($images)) {
+                        $images = array_unique(array_filter($images, fn($item) => !empty($item)));
+                    }
+
+                    if (empty($images)) {
+                        continue;
+                    }
+                    $images = array_unique($images);
+                    break;
+                } catch (\Exception $ex) {
+                    continue;
+                }
+            }
 
             $data = [
                 "title" => $title ?? '',
                 "sizes" => $sizes ?? [],
                 "colors" => $colors,
-                "price" => $price,
+                "regular_price" => $regularPrice,
+                "sale_price" => $salePrice,
                 "images" => $images,
                 "description" => $description,
             ];
+            $data = array($data);
         } catch (\Exception $e) {
-            return response()->json([
-                "status" => false,
-                "message" => $e->getMessage()
-            ], 422);
+            return redirect()->back()->with(["message.error" => $e->getMessage()])->withInput(["domain" => $url]);
         }
-
-        return response()->json($data);
+        return redirect()->back()->with(["message.success" => "Crawl Data Thành Công !"])->withInput(["domain" => $url])->with(compact("data"));
     }
 }
