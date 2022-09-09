@@ -32,7 +32,7 @@ class CrawlDataController extends Controller
         $url = $request->domain;
         try {
             $crawler = GoutteFacade::request('GET', $url);
-            $hasNoJsError = $crawler->filter('body')->first()->html();
+            $hasNoJsError = $crawler->filter('body')->first()->text();
             // if ($hasNoJsError) {
             //     return response()->json([
             //         "status" => false,
@@ -41,29 +41,40 @@ class CrawlDataController extends Controller
             // }
 
             // get title
-            $arrClassTitles = [
-                ".product-info__header_title",
-                ".product-info__body .product-info__header_title"
+            // $arrClassTitles = [
+            //     ".product-info__header_title",
+            //     ".product-info__body .product-info__header_title"
+            // ];
+            // $title = "";
+            // foreach ($arrClassTitles as $class) {
+            //     try {
+            //         $title = $crawler->filter($class)->first()->text();
+            //         break;
+            //     } catch (\Exception $ex) {
+            //         continue;
+            //     }
+            // }
+
+            // get size
+            $sizes = "";
+            $arrClassSizes = [
+                ".container .product-info__variants_value-wrapper",
+                ".product-info__variants-wrapper"
             ];
-            $title = "";
-            foreach ($arrClassTitles as $class) {
+            foreach ($arrClassSizes as $class) {
                 try {
-                    $title = $crawler->filter($class)->first()->text();
+                    $sizes = $crawler->filter($class)
+                        ->last()
+                        ->filter('label')
+                        ->each(function ($node) {
+                            return $node->text();
+                        });
                     break;
                 } catch (\Exception $ex) {
                     continue;
                 }
             }
-
-            dd($title);
-
-            // get size
-            $sizes = $crawler->filter('.container .product-info__variants_value-wrapper')
-                ->last()
-                ->filter('.product-info__variants_value label')
-                ->each(function ($node) {
-                    return $node->text();
-                });
+            dd($sizes);
 
             // get color
             $colors = $crawler->filter('.container .product-info__variants_value-wrapper')
