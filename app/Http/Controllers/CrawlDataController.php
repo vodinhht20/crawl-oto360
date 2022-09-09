@@ -33,7 +33,6 @@ class CrawlDataController extends Controller
         try {
             $crawler = GoutteFacade::request('GET', $url);
             $hasNoJsError = $crawler->filter('body')->first()->html();
-            dd($hasNoJsError);
             // if ($hasNoJsError) {
             //     return response()->json([
             //         "status" => false,
