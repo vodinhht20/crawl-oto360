@@ -41,11 +41,20 @@ class CrawlDataController extends Controller
             // }
 
             // get title
-            /**
-             * .product-info__header_title
-             * .container .product-info__header_title
-             */
-            $title = $crawler->filter('.product-info__body .product-info__header_title')->first()->text();
+            $arrClassTitles = [
+                ".product-info__header_title",
+                ".product-info__body .product-info__header_title"
+            ];
+            $title = "";
+            foreach ($arrClassTitles as $class) {
+                try {
+                    $title = $crawler->filter($class)->first()->text();
+                    break;
+                } catch (\Exception $ex) {
+                    continue;
+                }
+            }
+
             dd($title);
 
             // get size
