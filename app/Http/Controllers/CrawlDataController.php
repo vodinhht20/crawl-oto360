@@ -60,35 +60,52 @@ class CrawlDataController extends Controller
             // }
 
             // get size
-            $sizes = [];
-            $arrClassSizes = [
+            // $sizes = [];
+            // $arrClassSizes = [
+            //     ".container .product-info__variants_value-wrapper",
+            //     ".product-info__variants-wrapper"
+            // ];
+            // foreach ($arrClassSizes as $class) {
+            //     try {
+            //         $sizes = $crawler->filter($class)
+            //             ->last()
+            //             ->filter('label')
+            //             ->each(function ($node) {
+            //                 return $node->text();
+            //             });
+            //         if (empty($sizes)) {
+            //             continue;
+            //         }
+            //         break;
+            //     } catch (\Exception $ex) {
+            //         continue;
+            //     }
+            // }
+
+            // get color
+            $colors = [];
+            $arrClassColor = [
                 ".container .product-info__variants_value-wrapper",
                 ".product-info__variants-wrapper"
             ];
-            foreach ($arrClassSizes as $class) {
+
+            foreach ($arrClassColor as $class) {
                 try {
-                    $sizes = $crawler->filter($class)
-                        ->last()
-                        ->filter('label')
+                    $colors = $crawler->filter($class)
+                        ->first()
+                        ->filter('.product-info__variants_value input')
                         ->each(function ($node) {
-                            return $node->text();
+                            return $node->attr('value');
                         });
-                    if (empty($sizes)) {
+                    if (empty($colors)) {
                         continue;
                     }
                     break;
-                } catch (\Exception $ex) {
+                } catch (\Exception $e) {
                     continue;
                 }
             }
-dd($sizes);
-            // get color
-            $colors = $crawler->filter('.container .product-info__variants_value-wrapper')
-                ->first()
-                ->filter('.product-info__variants_value label')
-                ->each(function ($node) {
-                    return $node->text();
-                });
+            dd($colors);
 
             // get price
             $price = $crawler->filter('.product-info__header_price-wrapper .product-info__header_price')->first()->text();
