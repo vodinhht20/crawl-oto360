@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ExportDataCrawl;
 use App\Repositories\ProductImageRepository;
 use App\Repositories\ProductRepository;
 use DOMElement;
@@ -11,6 +12,7 @@ use Illuminate\Support\Facades\Http;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\DomCrawler\Image;
 use Weidner\Goutte\GoutteFacade;
+use Excel;
 
 class CrawlDataController extends Controller
 {
@@ -24,7 +26,8 @@ class CrawlDataController extends Controller
 
     public function index(Request $request)
     {
-        return view('main.index');
+        return Excel::download(new ExportDataCrawl(), 'data.csv');
+        // return view('main.index');
     }
 
     public function handleCrawl(Request $request)
