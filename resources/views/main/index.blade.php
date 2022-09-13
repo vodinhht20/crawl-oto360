@@ -11,14 +11,20 @@
     <div class="container">
       <h1>Nhập trang web muốn crawl</h1>
       <hr>
+      @include('layout.messages')
       <form action="{{ route('post-crawl-data') }}" method="post">
         @csrf
         <div class="form-group">
           <label for="exampleInputEmail1">Nhập domain</label>
-          <input type="url" class="form-control" name="domain" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="http://google.com...">
+          <input type="url" class="form-control" name="domain" value="{{ old('domain') }}" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="http://google.com...">
         </div>
         <button type="submit" class="btn btn-primary">Submit</button>
       </form>
+      @if (Session::has('data'))
+        <hr>
+        <h1>List Data</h1>
+        {{ dd(Session::get('data')) }}
+      @endif
     </div>
 
   <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
