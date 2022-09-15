@@ -5,9 +5,9 @@ namespace App\Exports;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\WithStrictNullComparison;
-use Excel;
+use Maatwebsite\Excel\Excel;
 
-class ExportDataCrawl implements FromArray, WithStrictNullComparison
+class ExportDataCrawl implements FromArray
 {
     use Exportable;
 
@@ -18,10 +18,10 @@ class ExportDataCrawl implements FromArray, WithStrictNullComparison
         $this->data = $data;
     }
 
-    private $writerType = \Maatwebsite\Excel\Excel::XLSX;
+    private $writerType = Excel::CSV;
 
     private $headers = [
-        'Content-Type' => 'text/csv',
+        'Content-Type' => 'text/csv'
     ];
 
     public function array(): array

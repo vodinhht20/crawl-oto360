@@ -14,6 +14,10 @@ use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\DomCrawler\Image;
 use Weidner\Goutte\GoutteFacade;
 use Excel;
+use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Excel as ExcelExcel;
+use Maatwebsite\Excel\Facades\Excel as FacadesExcel;
 
 class CrawlDataController extends Controller
 {
@@ -27,7 +31,6 @@ class CrawlDataController extends Controller
 
     public function index(Request $request)
     {
-        // return Excel::download(new ExportDataCrawl(), 'data.csv');
         return view('main.index');
     }
 
@@ -208,7 +211,7 @@ class CrawlDataController extends Controller
                 $data["colors"] = $colors;
             }
 
-            $data["description"] = $description;
+            $data["description"] = "`$description`";
 
             $formatData[] = [
                 $data['id'], // ID
@@ -218,8 +221,8 @@ class CrawlDataController extends Controller
                 1, // Published
                 0, // Is featured?
                 "visible", // Visibility in catalog
-                "", // Short description
-                $data['description'], // Description
+                "Oke", // Short description
+                "Oke", // Description
                 "", // Date sale price starts
                 "", // Date sale price ends
                 "taxable", // Tax status
@@ -274,8 +277,13 @@ class CrawlDataController extends Controller
                 "", // Attribute 3 global
                 "", // Attribute 3 default
             ];
-            $fileName = "data_" . date('Y_m_d_H_i') . ".csv";
-            return Excel::download(new ExportDataCrawl($formatData), $fileName);
+            $fileName = "list-data-product.csv";
+            $content = implode("\n", array_map(function ($item) {
+                return implode(",", $item);
+            }, $formatData));
+            Storage::disk('local')->put("public/". $fileName . "", $content);
+            $pathFile = asset("storage/$fileName");
+            return redirect($pathFile);
         } catch (\Exception $e) {
             return redirect()->back()->with(["message.error" => $e->getMessage()])->withInput(["domain" => $url]);
         }
