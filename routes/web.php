@@ -17,5 +17,5 @@ use Illuminate\Support\Facades\Route;
 // Route::get('/', function () {
 //     return view('welcome');
 // });
-Route::get('/', [CrawlDataController::class, 'index']);
+Route::get('/', [CrawlDataController::class, 'index'])->name("crawl-data");
 Route::post('/post-crawl-data', [CrawlDataController::class, 'handleCrawl'])->name('post-crawl-data');

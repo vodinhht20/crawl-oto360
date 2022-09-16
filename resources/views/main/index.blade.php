@@ -35,9 +35,12 @@
         </div>
     </form>
     @if (Session::has('data'))
+      @if (Session::get('file_name'))
+        <a href="{{ Session::get('file_name') }}">Download File</a>
+      @endif
       <hr>
       <h1>List Data</h1>
-      {{ dd(Session::get('data')) }}
+      {{ dump(json_encode(Session::get('data'))) }}
     @endif
   </div>
 @endsection

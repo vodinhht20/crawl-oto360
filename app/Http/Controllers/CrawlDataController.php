@@ -196,7 +196,7 @@ class CrawlDataController extends Controller
             $images = implode(", ", $images);
 
             $data = [
-                "id" => uniqid(),
+                "id" => rand(100, 100000),
                 "title" => $title ?? '',
                 "regular_price" => $regularPrice,
                 "sale_price" => $salePrice,
@@ -211,18 +211,18 @@ class CrawlDataController extends Controller
                 $data["colors"] = $colors;
             }
 
-            $data["description"] = "`$description`";
+            $description =  str_replace('"', "'", $description);
 
             $formatData[] = [
                 $data['id'], // ID
-                "variation", // Type
+                "simple", // Type
                 "", // SKU
                 $data['title'], // Name
                 1, // Published
                 0, // Is featured?
                 "visible", // Visibility in catalog
-                "Oke", // Short description
-                "Oke", // Description
+                $data['title'] . "...", // Short description
+                $description, // Description
                 "", // Date sale price starts
                 "", // Date sale price ends
                 "taxable", // Tax status
@@ -240,7 +240,7 @@ class CrawlDataController extends Controller
                 "", // Purchase note
                 $data['sale_price'] == $data['sale_price'] ? "" : $data['sale_price'], // Sale price
                 $data['regular_price'], // Regular price
-                "", // Categories
+                "Uncategorized", // Categories
                 "", // Tags
                 "", // Shipping class
                 $data['images'], // Images
@@ -277,17 +277,26 @@ class CrawlDataController extends Controller
                 "", // Attribute 3 global
                 "", // Attribute 3 default
             ];
+
             $fileName = "list-data-product.csv";
-            $content = implode("\n", array_map(function ($item) {
-                return implode(",", $item);
-            }, $formatData));
-            Storage::disk('local')->put("public/". $fileName . "", $content);
-            $pathFile = asset("storage/$fileName");
-            return redirect($pathFile);
+
+            $headers = [
+                'Content-Type' => 'text/csv'
+            ];
+            // cach 1;
+            return FacadesExcel::download(new ExportDataCrawl($formatData, $headers), "test.csv");
+
+            // cach 2;
+            // $content = implode("\n", array_map(function ($item) {
+            //     return implode(",", $item);
+            // }, $formatData));
+            // Storage::disk('local')->put("public/". $fileName . "", $content);
+            // $pathFile = asset("storage/$fileName");
+            // return redirect()->route("crawl-data")->with(["file_name" => $pathFile, "data" => $formatData]);
         } catch (\Exception $e) {
-            return redirect()->back()->with(["message.error" => $e->getMessage()])->withInput(["domain" => $url]);
+            return redirect()->route("crawl-data")->with(["message.error" => $e->getMessage()])->withInput(["domain" => $url]);
         }
-        return redirect()->back()->with(["message.success" => "Crawl Data Thành Công !"])->withInput(["domain" => $url])->with(compact("data"));
+        return redirect()->route("crawl-data")->with(["message.success" => "Crawl Data Thành Công !"])->withInput(["domain" => $url])->with(compact("data"));
     }
 
     private $headers = [
@@ -354,5 +363,51 @@ class CrawlDataController extends Controller
         "Attribute 3 global",
         "Attribute 3 default",
     ];
+
+    // private $headers = [
+    //     "ID",
+    //     "Type",
+    //     "SKU",
+    //     "Name",
+    //     "Published",
+    //     "Is featured?",
+    //     "Visibility in catalog",
+    //     "Short description",
+    //     "Description",
+    //     "Date sale price starts",
+    //     "Date sale price ends",
+    //     "Tax status",
+    //     "Tax class",
+    //     "In stock?",
+    //     "Stock",
+    //     "Low stock amount",
+    //     "Backorders allowed?",
+    //     "Sold individually?",
+    //     "Weight (kg)",
+    //     "Length (cm)",
+    //     "Width (cm)",
+    //     "Height (cm)",
+    //     "Allow customer reviews?",
+    //     "Purchase note",
+    //     "Sale price",
+    //     "Regular price",
+    //     "Categories",
+    //     "Tags",
+    //     "Shipping class",
+    //     "Images",
+    //     "Download limit",
+    //     "Download expiry days",
+    //     "Parent",
+    //     "Grouped products",
+    //     "Upsells",
+    //     "Cross-sells",
+    //     "External URL",
+    //     "Button text",
+    //     "Position",
+    // ];
+
+    // $formatData[] = [
+    //     221,"simple","","San pham demo",1,0,"visible","San pham demo | sort desc","San pham demo | desc","","","taxable","",1,"","",0,0,"","","","",1,"",90000,100000,"Uncategorized","","","http://kteam.vn/wp-content/uploads/2022/09/afc5a13b57096196894f5536bfc74ee7_1080x_nw.jpg, http://kteam.vn/wp-content/uploads/2022/09/fd86c94d6916291f4ce7e378906067da_1080x_nw.jpeg","","","","","","","","",0
+    // ];
 }
 
