@@ -36,15 +36,14 @@
         </div>
     </form>
     @if (Session::has('data'))
-      <div style="padding-bottom: 200px;">
+      <div style="padding-bottom: 200px;" style="mt-3">
         @php
           $dataRoot = Session::get('data');
           $headers = $dataRoot[0];
           unset($dataRoot[0]);
           $data = $dataRoot;
         @endphp
-        <hr>
-        <h1>List Data</h1>
+        <h3>List Data</h3>
         <div class="table-responsive">
           <table class="table table-hover">
             <thead>

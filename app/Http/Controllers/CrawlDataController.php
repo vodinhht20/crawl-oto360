@@ -301,6 +301,7 @@ class CrawlDataController extends Controller
         $description =  str_replace('"', "'", $description);
         $description =  str_replace('data-src', "src", $description);
         $description =  str_replace('origin-src', "src", $description);
+        $description =  str_replace('{width}', "500", $description);
         return $description;
     }
 
