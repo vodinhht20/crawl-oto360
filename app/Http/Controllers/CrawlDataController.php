@@ -94,11 +94,9 @@ class CrawlDataController extends Controller
             $data["colors"] = $colors;
         }
 
-        $description =  str_replace('"', "'", $description);
-
         $formatData[] = [
             $data['id'], // ID
-            "simple", // Type
+            "external", // Type
             "", // SKU
             $data['title'], // Name
             1, // Published
@@ -151,13 +149,13 @@ class CrawlDataController extends Controller
             "", // Attribute 1 default
             "Color", // Attribute 2 name
             $data['colors'], // Attribute 2 value(s)
-            "", // Attribute 2 visible
-            "", // Attribute 2 global
+            1, // Attribute 2 visible
+            1, // Attribute 2 global
             "", // Attribute 2 default
             "Size", // Attribute 3 name
             $data['sizes'], // Attribute 3 value(s)
-            "", // Attribute 3 visible
-            "", // Attribute 3 global
+            1, // Attribute 3 visible
+            1, // Attribute 3 global
             "", // Attribute 3 default
         ];
         return $formatData;
@@ -229,6 +227,9 @@ class CrawlDataController extends Controller
         } catch (\Exception $ex) {
             //
         }
+        $description =  str_replace('"', "'", $description);
+        $description =  str_replace('data-src', "src", $description);
+        $description =  str_replace('origin-src', "src", $description);
         return $description;
     }
 
