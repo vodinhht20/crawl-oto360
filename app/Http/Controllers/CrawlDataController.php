@@ -14,13 +14,18 @@ use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\DomCrawler\Image;
 use Weidner\Goutte\GoutteFacade;
 use Excel;
+use Illuminate\Auth\Events\Validated;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Excel as ExcelExcel;
 use Maatwebsite\Excel\Facades\Excel as FacadesExcel;
 
 class CrawlDataController extends Controller
 {
+    const TYPE_ONLY = 1;
+    const TYPE_COLLECTION = 2;
+
     public function __construct(
         private ProductRepository $productRepo,
         private ProductImageRepository $productImageRepo
@@ -36,15 +41,32 @@ class CrawlDataController extends Controller
 
     public function handleCrawl(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            "domain" => "required",
+            "type" => "required",
+        ], [
+            "domain.required" => "Vui lòng nhập domain",
+            "type.required" => "Vui lòng nhập loại hình crawl",
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->route("crawl-data")->with(["message.error" => $validator->messages()->first() ])->withInput();
+        }
+
         $url = $request->domain;
+        $type = $request->type;
+
         try {
             $fileName = "list-data-product.csv";
+            $data[] = $this->headers;
             $headers = [
                 'Content-Type' => 'text/csv'
             ];
-
-            $data = $this->baseCrawl($url);
-
+            if ($type == self::TYPE_ONLY) {
+                $data[] = $this->baseCrawl($url);
+            } else {
+                $data = [...$data, ...$this->CrawlCollection($url)];
+            }
             return FacadesExcel::download(new ExportDataCrawl($data, $headers), "test.csv");
         } catch (\Exception $e) {
             return redirect()->route("crawl-data")->with(["message.error" => $e->getMessage() . " | Line " . $e->getLine() ])->withInput(["domain" => $url]);
@@ -55,7 +77,6 @@ class CrawlDataController extends Controller
     public function baseCrawl($url): array
     {
         $crawler = GoutteFacade::request('GET', $url);
-        $formatData[] = $this->headers;
 
         // get title
         $title = $this->getTitle($crawler);
@@ -94,7 +115,7 @@ class CrawlDataController extends Controller
             $data["colors"] = $colors;
         }
 
-        $formatData[] = [
+        $formatData = [
             $data['id'], // ID
             "external", // Type
             "", // SKU
@@ -159,6 +180,25 @@ class CrawlDataController extends Controller
             "", // Attribute 3 default
         ];
         return $formatData;
+    }
+
+    public function CrawlCollection($url): array
+    {
+        $crawler = GoutteFacade::request('GET', $url);
+        $linkProducts = $crawler->filter('.product-snippet .product-snippet__img-wrapper')
+            ->each(function (Crawler $node) {
+                return $node->link()->getUri();
+            });
+        $data = [];
+        foreach ($linkProducts as $link) {
+           try {
+                $data[] = $this->baseCrawl($link);
+           } catch (\Exception $ex) {
+                continue;
+           }
+        }
+
+        return $data;
     }
 
     public function getTitle($crawler): string

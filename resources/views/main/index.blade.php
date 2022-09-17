@@ -7,7 +7,7 @@
       @csrf
         <div class="col-lg-6 col-sx-12 col-md-6">
           <div class="form-group">
-            <label for="exampleInputEmail1">Lựa chọn nền tảng</label>
+            <label for="">Lựa chọn nền tảng</label>
             <select name="" id="" class="form-control">
               <option value="1">Nền tảng Shopify</option>
             </select>
@@ -15,8 +15,8 @@
         </div>
         <div class="col-lg-6 col-sx-12 col-md-6">
           <div class="form-group">
-            <label for="exampleInputEmail1">Lựa chọn loại</label>
-            <select name="" id="" class="form-control">
+            <label for="">Lựa chọn loại</label>
+            <select name="type" id="" class="form-control">
               <option value="1">One Product</option>
               <option value="2">Collection</option>
             </select>
