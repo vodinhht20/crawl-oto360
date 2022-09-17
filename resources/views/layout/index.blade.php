@@ -20,12 +20,18 @@
         <div class="col-4 text-right">
           <div class="dropdown">
             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              Tài khoản
-              {{-- Admin --}}
+              @if (session("authenticated"))
+                Xin chào {{ session("authenticated") }} !
+              @else
+                Tài khoản
+              @endif
             </button>
             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-              <a class="dropdown-item" href="#">Đăng xuất</a>
-              <a class="dropdown-item" href="#">Đăng nhập</a>
+              @if (session("authenticated"))
+                <a class="dropdown-item" href="{{ route("logout") }}">Đăng xuất</a>
+              @else
+                <a class="dropdown-item" href="{{ route("login") }}">Đăng nhập</a>
+              @endif
             </div>
           </div>
         </div>

@@ -1,17 +1,23 @@
-<form class="dropdown-menu p-4">
-    <div class="form-group">
-      <label for="exampleDropdownFormEmail2">Email address</label>
-      <input type="email" class="form-control" id="exampleDropdownFormEmail2" placeholder="email@example.com">
+@extends('layout.index')
+@section('content')
+  <div class="wrapper-content mt-3 row justify-content-center">
+    <div class="col-lg-6 col-md-8 col-sx-10">
+      <h4>Đăng nhập</h4>
+      @include('layout.messages')
+      <form class="mt-4" method="POST" action="{{ route("post-login") }}">
+        @csrf
+        <div class="form-group">
+          <label>Nhập tên tài khoản</label>
+          <input type="text" name="account" class="form-control" placeholder="Nhập tên tài khoản ...">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" name="password" class="form-control" placeholder="Password">
+        </div>
+        <div class="text-center">
+          <button type="submit" class="btn btn-primary">Login</button>
+        </div>
+      </form>
     </div>
-    <div class="form-group">
-      <label for="exampleDropdownFormPassword2">Password</label>
-      <input type="password" class="form-control" id="exampleDropdownFormPassword2" placeholder="Password">
     </div>
-    <div class="form-check">
-      <input type="checkbox" class="form-check-input" id="dropdownCheck2">
-      <label class="form-check-label" for="dropdownCheck2">
-        Remember me
-      </label>
-    </div>
-    <button type="submit" class="btn btn-primary">Sign in</button>
-</form>
+@endsection

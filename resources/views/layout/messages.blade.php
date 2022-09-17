@@ -10,3 +10,9 @@
         <span>{{ Session::get('message.success') }}</span>
       </div>
 @endif
+@if (Session::has('message.info'))
+    <div class="alert alert-info" role="alert">
+        <h5>Thông tin !</h5>
+        <span>{{ Session::get('message.info') }}</span>
+      </div>
+@endif

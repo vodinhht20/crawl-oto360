@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\CrawlDataController;
 use Illuminate\Support\Facades\Route;
 
@@ -17,5 +18,8 @@ use Illuminate\Support\Facades\Route;
 // Route::get('/', function () {
 //     return view('welcome');
 // });
-Route::get('/', [CrawlDataController::class, 'index'])->name("crawl-data");
-Route::post('/post-crawl-data', [CrawlDataController::class, 'handleCrawl'])->name('post-crawl-data');
+Route::get('/login', [AuthenticationController::class, 'index'])->name("login");
+Route::get('/logout', [AuthenticationController::class, 'logout'])->name("logout");
+Route::post('/post-login', [AuthenticationController::class, 'postLogin'])->name("post-login");
+Route::get('/', [CrawlDataController::class, 'index'])->middleware("authenticated")->name("crawl-data");
+Route::post('/post-crawl-data', [CrawlDataController::class, 'handleCrawl'])->middleware("authenticated")->name('post-crawl-data');
