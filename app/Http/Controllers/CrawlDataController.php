@@ -74,6 +74,37 @@ class CrawlDataController extends Controller
         return redirect()->route("crawl-data")->with(["message.success" => "Crawl Data Thành Công !"])->withInput(["domain" => $url])->with(compact("data"));
     }
 
+    public function viewData(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            "domain" => "required",
+            "type" => "required",
+        ], [
+            "domain.required" => "Vui lòng nhập domain",
+            "type.required" => "Vui lòng nhập loại hình crawl",
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->route("crawl-data")->with(["message.error" => $validator->messages()->first() ])->withInput();
+        }
+
+        $url = $request->domain;
+        $type = $request->type;
+
+        try {
+            $data[] = $this->headers;
+            if ($type == self::TYPE_ONLY) {
+                $data[] = $this->baseCrawl($url);
+            } else {
+                $data = [...$data, ...$this->CrawlCollection($url)];
+            }
+            return redirect()->route("crawl-data")->with("data", $data)->withInput($request->all());
+        } catch (\Exception $e) {
+            return redirect()->route("crawl-data")->with(["message.error" => $e->getMessage() . " | Line " . $e->getLine() ])->withInput($request->all());
+        }
+        return redirect()->route("crawl-data")->with(["message.success" => "Crawl Data Thành Công !"])->withInput($request->all());
+    }
+
     public function baseCrawl($url): array
     {
         $crawler = GoutteFacade::request('GET', $url);

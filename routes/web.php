@@ -15,11 +15,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// Route::get('/', function () {
-//     return view('welcome');
-// });
 Route::get('/login', [AuthenticationController::class, 'index'])->name("login");
 Route::get('/logout', [AuthenticationController::class, 'logout'])->name("logout");
 Route::post('/post-login', [AuthenticationController::class, 'postLogin'])->name("post-login");
 Route::get('/', [CrawlDataController::class, 'index'])->middleware("authenticated")->name("crawl-data");
 Route::post('/post-crawl-data', [CrawlDataController::class, 'handleCrawl'])->middleware("authenticated")->name('post-crawl-data');
+Route::post('/post-view-data', [CrawlDataController::class, 'viewData'])->middleware("authenticated")->name('post-view-data');
