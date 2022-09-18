@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Console\Commands;
 
+use Illuminate\Console\Command;
 use App\Exports\ExportDataCrawl;
 use App\Repositories\ProductImageRepository;
 use App\Repositories\ProductRepository;
@@ -22,8 +23,22 @@ use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Excel as ExcelExcel;
 use Maatwebsite\Excel\Facades\Excel as FacadesExcel;
 
-class CrawlDataController extends Controller
+class CrawlData extends Command
 {
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'crawl:oto360-data';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Command description';
+
     const TYPE_ONLY = 1;
     const TYPE_COLLECTION = 2;
 
@@ -32,13 +47,14 @@ class CrawlDataController extends Controller
         private ProductImageRepository $productImageRepo
     )
     {
-
+        parent::__construct();
     }
 
-    public function index(Request $request)
+    public function handle()
     {
         $data[] = $this->header();
-        for ($i=1; $i <= 10; $i++) {
+        $this->info("------ Bắt đầu -------");
+        for ($i=1; $i <= 600; $i++) {
             $body =[
                 [
                     'name' => 'ajax',
@@ -50,13 +66,16 @@ class CrawlDataController extends Controller
                 ]
             ];
             try {
-                $data[] = $this->handleCrawl($i, $body);
+                $this->info("------ [$i / 600] -------");
+                $data[] = $this->handleCrawl($i, $body, "Đề 600 câu");
             } catch (\Exception $e) {
+                $this->error("------ Lỗi [$i / 600] -------");
                 continue;
             }
         }
 
         for ($j=1; $j <= 60; $j++) {
+            $this->info("------ [Đề $j] -------");
             for ($i=1; $i <= 35; $i++) {
                 if ($i == 1) {
                     $body =[
@@ -98,16 +117,20 @@ class CrawlDataController extends Controller
                     ];
                 }
                 try {
-                    $data[] = $this->handleCrawl($i, $body);
+                    $this->info("------ [Đề $j] [Câu $i] -------");
+                    $data[] = $this->handleCrawl($i, $body, "Đề $j");
                 } catch (\Exception $e) {
+                    $this->info("------ Lỗi [Đề $j] [Câu $i] -------");
                     continue;
                 }
             }
         }
-        return FacadesExcel::download(new ExportDataCrawl($data, []), "test.xlsx");
+        $this->info("------ Hoàn thành -------");
+        $fileName = "list-data-oto360" . date("Y-m-d-H-i") . ".xlsx";
+        return FacadesExcel::store(new ExportDataCrawl($data), $fileName);
     }
 
-    public function handleCrawl($id, $body, $title)
+    public function handleCrawl($id, $body, $title = "")
     {
         $client = new Client();
         $headers = [
@@ -121,6 +144,7 @@ class CrawlDataController extends Controller
         $content = $res->getBody()->getContents();
         $crawler = new Crawler($content);
         return [
+            $title,
             $id,
             $this->getQuesition($crawler),
             $this->getImagesQuestion($crawler),
@@ -151,7 +175,8 @@ class CrawlDataController extends Controller
     public function header()
     {
         return [
-            "STT",
+            "Chương / Đề",
+            "Câu",
             "Question",
             "Images_question",
             "Anwser",
@@ -169,4 +194,3 @@ class CrawlDataController extends Controller
         }
     }
 }
-
